@@ -37,24 +37,21 @@ class TimeEncoderConfig:
     Configuration for the time-domain encoder.
 
     Parameters:
-    - size (int): Input size of the time-domain signal window.
-    - stride (int): Stride for convolutional layers.
-    - padding (int): Padding for convolutional layers.
+    - kernel_size (list of int): Input size of the kernels.
+    - stride (list of int): Stride for convolutional layers.
     - channels (list of int): Channel sizes for conv layers, length 4 (input + 3 layers).
     - activations (list of str): Activation function names for each conv layer.
     - linear_dims (list of int): Dimensions for the fully connected layers, length 3.
     """
     def __init__(self,
-                 size=None,
-                 stride=None,
-                 padding=None,
-                 channels=None,
-                 activations=None,
-                 linear_dims=None):
+                 kernel_size=[8, 8, 8, 4],
+                 stride=[4, 4, 4, 2],
+                 channels=[1, 2, 3, 4, 5],
+                 activations=["relu", "relu", "relu", "relu"],
+                 linear_dims=[40, 10, 2]):
         
-        self.size = size
+        self.kernel_size = kernel_size
         self.stride = stride
-        self.padding = padding
         self.channels = channels
         self.activations = activations
         self.linear_dims = linear_dims
@@ -73,23 +70,21 @@ class FreqEncoderConfig:
     - linear_dims (list of int): Dimensions for the fully connected layers, length 3.
     """
     def __init__(self,
-                 kernel_size=None,
-                 stride=None,
-                 padding=None,
-                 channels=None,
-                 activations=None,
-                 linear_dims=None):
+                 kernel_size=[8, 4, 4],
+                 stride=[4, 2, 2],
+                 channels=[1, 2, 3, 4],
+                 activations=["relu", "relu", "relu"],
+                 linear_dims=[32, 8, 2]):
         
         self.kernel_size = kernel_size
         self.stride = stride
-        self.padding = padding
         self.channels = channels
         self.activations = activations
         self.linear_dims = linear_dims
 
 
 class GlobalConfig:
-    def __init__(self, window_size=128):
-        self.augmentation_config = AugmentationConfig()
-        self.time_encoder_config = TimeEncoderConfig(size=window_size)
-        self.freq_encoder_config = FreqEncoderConfig()
+    def _init_(self, augmentation_config=None, time_encoder_config=None, freq_encoder_config=None):
+        self.augmentation_config = augmentation_config if augmentation_config is not None else AugmentationConfig()
+        self.time_encoder_config = time_encoder_config if time_encoder_config is not None else TimeEncoderConfig()
+        self.freq_encoder_config = freq_encoder_config if freq_encoder_config is not None else FreqEncoderConfig()
