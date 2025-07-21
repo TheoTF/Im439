@@ -82,9 +82,25 @@ class FreqEncoderConfig:
         self.activations = activations
         self.linear_dims = linear_dims
 
+class DatasetConfig:
+    def __init__(self, 
+                 input_df,
+                 sensor_column='UA_Z_AL',
+                 window_size=128, 
+                 step_size=32, 
+                 max_time_gap=2):
+
+        self.input_df = input_df
+        self.window_size = window_size
+        self.step_size = step_size
+        self.max_time_gap = max_time_gap
+        self.sensor_column = sensor_column
 
 class GlobalConfig:
-    def _init_(self, augmentation_config=None, time_encoder_config=None, freq_encoder_config=None):
+    def __init__(self, augmentation_config=None, time_encoder_config=None, freq_encoder_config=None, dataset_config=None):
         self.augmentation_config = augmentation_config if augmentation_config is not None else AugmentationConfig()
         self.time_encoder_config = time_encoder_config if time_encoder_config is not None else TimeEncoderConfig()
         self.freq_encoder_config = freq_encoder_config if freq_encoder_config is not None else FreqEncoderConfig()
+        if dataset_config is None:
+            raise ValueError("Input df not defined.")
+        self.dataset_config = dataset_config

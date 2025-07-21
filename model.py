@@ -65,8 +65,6 @@ class TimeEncoder(nn.Module):
         x = self.fc2(x)
         return x
 
-
-
 class FreqEncoder(nn.Module):
     def __init__(self, freq_encoder_config):
         super().__init__()
@@ -127,10 +125,10 @@ class FreqEncoder(nn.Module):
 
 
 class DualTimeSeriesModel(nn.Module):
-    def __init__(self):
+    def __init__(self, global_config):
         super().__init__()
-        self.encoder1 = TimeEncoder()
-        self.encoder2 = FreqEncoder()
+        self.encoder1 = TimeEncoder(global_config.time_encoder_config)
+        self.encoder2 = FreqEncoder(global_config.freq_encoder_config)
 
     def forward(self, x1, x2):
         z1 = self.encoder1(x1)
@@ -138,13 +136,16 @@ class DualTimeSeriesModel(nn.Module):
         return z1, z2
 
 
-def loss(Zt, Zf, Zt_aug, Zf_aug, tau=2, delta=1):
-
-    normal_dist = (torch.norm(Zt-Zf)^2)/tau
+def custom_loss(Zt, Zf, Zt_aug, Zf_aug, delta=1):
+    # Compute norms across batch
+    normal_dist = torch.norm(Zt - Zf, dim=1)
+    augmented_dist = torch.norm(Zt_aug - Zf_aug, dim=1)
     
-    augmented_dist = (torch.norm((Zt_aug-Zf_aug))^2)/tau
+    mean_orig = (Zt + Zf) / 2
+    mean_aug = (Zt_aug + Zf_aug) / 2
+    pair_dist = torch.norm(mean_orig - mean_aug, dim=1)
 
-    pair_dist =  torch.norm(((Zt + Zf)/2) - ((Zt_aug + Zf_aug)/2))
-    delta_dist = (abs(pair_dist - delta)^2)/tau
-
-    return normal_dist + augmented_dist + delta_dist
+    delta_dist = torch.clamp(pair_dist - delta, min=0)
+    
+    # Return mean loss over batch
+    return (normal_dist + augmented_dist + delta_dist).mean()

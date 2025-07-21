@@ -1,7 +1,7 @@
 import torch
 import random
 
-class create_inputs():
+class CreateInputs():
     def __init__(self, global_config):
         """
         Initializes the augmentation helper with global configuration.
