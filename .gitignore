@@ -1,0 +1,4 @@
+*.parquet
+*.pyc
+*.log
+events.*
